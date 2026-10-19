@@ -1,3 +1,8 @@
+use std::{
+    rc::Rc,
+    sync::{Arc, Mutex},
+};
+
 fn main() {
     let penguin_data = "\
     common name, length (cm)
@@ -21,4 +26,11 @@ fn main() {
             println!("{}, {}cm", name, length);
         }
     }
+
+    let a = 10; // stack
+    let b = Box::new(10); // boxed value (heap)
+    let c = Rc::new(Box::new(10)); // boxed value wrapped within a reference counter
+    let d = Arc::new(Mutex::new(10)); // value wrapped in atomic reference counter and protected by mutual exclusion lock
+
+    println!("{}, {}, {}, {:?}", a, b, c, d);
 }
