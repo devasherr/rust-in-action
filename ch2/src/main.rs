@@ -1,4 +1,5 @@
 use std::f32::EPSILON;
+use std::ops::Add;
 
 fn main() {
     let a = 30_i32; // let a: i32 = 30;
@@ -82,11 +83,13 @@ fn main() {
             println!("{} {}", item, result)
         }
     }
+    println!();
 
-    // function
-    for item in &haystack {
-        if *item == niddle {
-            println!("{}", item)
-        }
+    // generic functions
+    fn add<T: Add<Output = T>>(i: T, j: T) -> T {
+        i + j
     }
+
+    println!("{}", add(4, 8));
+    println!("{}", add(4.2, 8.5));
 }
