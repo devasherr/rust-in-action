@@ -39,11 +39,54 @@ fn main() {
     println!();
 
     assert!(abc.0 + abc.1 == abc.2);
-    assert!(xyz.0 + xyz.1 == xyz.2); // only fails on this one
+    // assert!(xyz.0 + xyz.1 == xyz.2); // only fails on this one
 
     let result: f32 = 0.1 + 0.1;
     let desired: f32 = 0.2;
 
     let absolute_difference = (desired - result).abs();
-    assert!(absolute_difference <= f32::EPSILON)
+    assert!(absolute_difference <= f32::EPSILON);
+
+    // flow control
+    let collections = [1, 2, 3, 4, 5];
+    for i in 0..collections.len() {
+        let item = collections[i];
+        println!("{item}")
+
+        // this loop approach is not advised for two reasons
+        // performance - index bound has to be checked
+        // safety - there might be a possibility where collection might change
+        // just you a for loop in a case like this mate
+    }
+
+    'outer: for x in 0.. {
+        for y in 0.. {
+            for z in 0.. {
+                if x + y + z > 100 {
+                    break 'outer;
+                }
+            }
+        }
+    }
+
+    // match
+    let niddle = 42;
+    let haystack = [1, 2, 5, 42, 14, 132, 1430];
+    for item in &haystack {
+        let result = match item {
+            42 | 132 => "hit",
+            _ => "miss",
+        };
+
+        if result == "hit" {
+            println!("{} {}", item, result)
+        }
+    }
+
+    // function
+    for item in &haystack {
+        if *item == niddle {
+            println!("{}", item)
+        }
+    }
 }
