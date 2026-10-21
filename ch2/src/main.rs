@@ -3,7 +3,7 @@ use regex::Regex;
 use std::f32::EPSILON;
 use std::fs::File;
 use std::future::poll_fn;
-use std::io::{BufRead, BufReader};
+use std::io::{self, BufRead, BufReader};
 use std::ops::Add;
 
 fn numeric_literals() {
@@ -103,6 +103,17 @@ fn generics() {
     println!();
 }
 
+fn process_lines<T: BufRead + Sized>(reader: T, re: Regex) {
+    for line in reader.lines() {
+        let line = line.unwrap();
+        let contains_substring = re.find(&line);
+        match contains_substring {
+            Some(_) => println!("{}", line),
+            None => (),
+        }
+    }
+}
+
 fn grep_lite() {
     let args = App::new("grep-lite")
         .version("0.1")
@@ -117,24 +128,22 @@ fn grep_lite() {
             Arg::with_name("input")
                 .help("the file to search")
                 .takes_value(true)
-                .required(true),
+                .required(false),
         )
         .get_matches();
 
     let pattern = args.value_of("pattern").unwrap();
     let re = Regex::new(pattern).unwrap();
-    let input = args.value_of("input").unwrap();
+    let input = args.value_of("input").unwrap_or("-");
 
-    let f = File::open(input).unwrap();
-
-    let reader = BufReader::new(f);
-    for line in reader.lines() {
-        let line = line.unwrap();
-        let contains_substring = re.find(&line);
-        match contains_substring {
-            Some(_) => println!("{}", line),
-            None => (),
-        }
+    if input == "-" {
+        let stdin = io::stdin();
+        let reader = stdin.lock();
+        process_lines(reader, re);
+    } else {
+        let f = File::open(input).unwrap();
+        let reader = BufReader::new(f);
+        process_lines(reader, re);
     }
 }
 
