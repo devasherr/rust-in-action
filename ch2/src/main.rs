@@ -1,3 +1,5 @@
+use clap::{App, Arg};
+use regex::Regex;
 use std::f32::EPSILON;
 use std::future::poll_fn;
 use std::ops::Add;
@@ -100,16 +102,30 @@ fn generics() {
 }
 
 fn grep_lite() {
-    let query = "picture";
+    let args = App::new("grep-lite")
+        .version("0.1")
+        .about("search for patterns")
+        .arg(
+            Arg::with_name("pattern")
+                .help("the pattern to search for")
+                .takes_value(true)
+                .required(true),
+        )
+        .get_matches();
+
+    let pattern = args.value_of("pattern").unwrap();
+    let re = Regex::new(pattern).unwrap();
     let quote = "\
 Every face, every shop, bedroom window, public-house, and
 dark square is a picture feverishly turned--in search of what?
 It is the same with books.
 What do we seek through millions of pages?";
 
-    for (i, line) in quote.lines().enumerate() {
-        if line.contains(query) {
-            println!("{}: {}", i + 1, line);
+    for line in quote.lines() {
+        let contains_substring = re.find(line);
+        match contains_substring {
+            Some(_) => println!("{}", line),
+            None => (),
         }
     }
 }
@@ -133,7 +149,7 @@ through millions of pages?";
         if line.contains(needle) {
             tags.push(i);
 
-            let v = Vec::with_capacity(2 * ctx_lines + 1);
+            let v = Vec::with_capacity(2 * ctx_lines + 1); // good habit to give Vec size hint
             ctx.push(v);
         }
     }
@@ -191,6 +207,6 @@ fn main() {
     // _match();
     // generics();
     // arrays();
-    // grep_lite();
-    grep_lite2();
+    grep_lite();
+    // grep_lite2();
 }
