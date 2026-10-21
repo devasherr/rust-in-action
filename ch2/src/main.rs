@@ -1,7 +1,9 @@
 use clap::{App, Arg};
 use regex::Regex;
 use std::f32::EPSILON;
+use std::fs::File;
 use std::future::poll_fn;
+use std::io::{BufRead, BufReader};
 use std::ops::Add;
 
 fn numeric_literals() {
@@ -111,18 +113,24 @@ fn grep_lite() {
                 .takes_value(true)
                 .required(true),
         )
+        .arg(
+            Arg::with_name("input")
+                .help("the file to search")
+                .takes_value(true)
+                .required(true),
+        )
         .get_matches();
 
     let pattern = args.value_of("pattern").unwrap();
     let re = Regex::new(pattern).unwrap();
-    let quote = "\
-Every face, every shop, bedroom window, public-house, and
-dark square is a picture feverishly turned--in search of what?
-It is the same with books.
-What do we seek through millions of pages?";
+    let input = args.value_of("input").unwrap();
 
-    for line in quote.lines() {
-        let contains_substring = re.find(line);
+    let f = File::open(input).unwrap();
+
+    let reader = BufReader::new(f);
+    for line in reader.lines() {
+        let line = line.unwrap();
+        let contains_substring = re.find(&line);
         match contains_substring {
             Some(_) => println!("{}", line),
             None => (),
@@ -199,6 +207,16 @@ fn arrays() {
     }
 }
 
+fn read_file() {
+    let f = File::open("readme.md").unwrap();
+    let reader = BufReader::new(f);
+
+    for line in reader.lines() {
+        let line = line.unwrap();
+        println!("{} ({} bytes long)", line, line.len());
+    }
+}
+
 fn main() {
     // numeric_literals();
     // base();
@@ -209,4 +227,5 @@ fn main() {
     // arrays();
     grep_lite();
     // grep_lite2();
+    // read_file();
 }
