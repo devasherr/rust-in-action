@@ -1,9 +1,16 @@
 #![allow(unused_variables)]
 
 #[derive(Debug)]
+enum FileState {
+    Open,
+    Closed,
+}
+
+#[derive(Debug)]
 struct File {
     name: String,
     data: Vec<u8>,
+    state: FileState,
 }
 
 impl File {
@@ -11,6 +18,7 @@ impl File {
         File {
             name: String::from(name),
             data: Vec::new(),
+            state: FileState::Closed,
         }
     }
 
@@ -29,11 +37,13 @@ impl File {
     }
 }
 
-fn open(f: File) -> Result<File, String> {
+fn open(mut f: File) -> Result<File, String> {
+    f.state = FileState::Open;
     Ok(f)
 }
 
-fn close(f: File) -> Result<File, String> {
+fn close(mut f: File) -> Result<File, String> {
+    f.state = FileState::Closed;
     Ok(f)
 }
 
@@ -50,8 +60,39 @@ fn file_stuff() {
     println!("{} if {} bytes long", f1_name, f1_length);
 }
 
-fn file_stuff2() {}
+#[derive(Debug)]
+enum Event {
+    Update,
+    Delete,
+    Unknown,
+}
+
+type Message = String;
+
+fn parse_log(line: &str) -> (Event, Message) {
+    let parts: Vec<_> = line.splitn(2, ' ').collect();
+    if parts.len() == 1 {
+        return (Event::Unknown, String::from(line));
+    }
+
+    let event = parts[0];
+    let rest = String::from(parts[1]);
+
+    match event {
+        "UPDATE" => (Event::Update, String::from(rest)),
+        "DELETE" => (Event::Delete, String::from(rest)),
+        _ => (Event::Unknown, String::from(rest)),
+    }
+}
 
 fn main() {
-    file_stuff();
+    // file_stuff();
+    let log = "BEGIN Transaction XK342
+UPDATE 234:LS/32231 {\"price\": 31.00} -> {\"price\": 40.00}
+DELETE 342:LO/22111";
+
+    for line in log.lines() {
+        let result = parse_log(line);
+        println!("{:?}", result);
+    }
 }
