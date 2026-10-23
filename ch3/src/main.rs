@@ -1,9 +1,21 @@
 #![allow(unused_variables)]
 
-#[derive(Debug)]
+use std::fmt;
+use std::fmt::Display;
+
+#[derive(Debug, PartialEq)]
 enum FileState {
     Open,
     Closed,
+}
+
+impl Display for FileState {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            FileState::Open => write!(f, "OPEN"),
+            FileState::Closed => write!(f, "CLOSED"),
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -13,6 +25,11 @@ struct File {
     state: FileState,
 }
 
+impl Display for File {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "<{} ({})>", self.name, self.state)
+    }
+}
 impl File {
     fn new(name: &str) -> File {
         File {
@@ -95,4 +112,7 @@ DELETE 342:LO/22111";
         let result = parse_log(line);
         println!("{:?}", result);
     }
+
+    let fs = FileState::Open;
+    println!("{}", fs);
 }
