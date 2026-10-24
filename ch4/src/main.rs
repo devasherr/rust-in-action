@@ -1,3 +1,5 @@
+use std::{cell::RefCell, rc::Rc};
+
 #[derive(Debug)]
 struct Message {
     to: u64,
@@ -47,7 +49,10 @@ impl CubeSat {
     }
 }
 
-struct GroundStation;
+#[derive(Debug)]
+struct GroundStation {
+    radio_freq: f64,
+}
 
 impl GroundStation {
     fn send(&self, mailbox: &mut MailBox, msg: Message) {
@@ -70,11 +75,11 @@ fn fetch_sat_ids() -> Vec<u64> {
 
 fn main() {
     let mut mail = MailBox { messages: vec![] };
-    let base = GroundStation {};
+    let base = GroundStation { radio_freq: 101.1 };
     let sat_ids = fetch_sat_ids();
 
     for sat_id in sat_ids {
-        let sat = base.connect(sat_id);
+        let _ = base.connect(sat_id);
         let msg = Message {
             to: sat_id,
             content: String::from("Hello"),
@@ -89,4 +94,25 @@ fn main() {
         let msg = sat.recv(&mut mail);
         println!("{:?}: {:?}", sat, msg);
     }
+
+    // Reference Counting: std::rc::Rc
+    // use when multiple parts of a program must own the same value (example: Graph, Tree ...)
+
+    let base: Rc<RefCell<GroundStation>> =
+        Rc::new(RefCell::new(GroundStation { radio_freq: 101.1 }));
+    println!("base: {:?}", base);
+
+    {
+        let mut base2 = base.borrow_mut(); // points to the same place as base
+        base2.radio_freq -= 91.1;
+        println!("base2: {:?}", base2);
+    }
+
+    println!("base: {:?}", base);
+
+    let mut base3 = base.borrow_mut(); // also points to the same place as base
+    base3.radio_freq += 11.2;
+    println!("base3: {:?}", base3);
+
+    println!("base: {:?}", base);
 }
