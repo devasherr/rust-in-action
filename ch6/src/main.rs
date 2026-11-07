@@ -49,6 +49,26 @@ fn print_addresses() {
     println!("boxed_int: {:p}", Box::into_raw(boxed_int));
 }
 
+fn row_wise_sum(data: &[u32], n: usize) -> u64 {
+    let mut res = 0_u64;
+    for i in 0..n {
+        for j in 0..n {
+            res += data[i * n + j] as u64;
+        }
+    }
+    res
+}
+
+fn col_wise_sum(data: &[u32], n: usize) -> u64 {
+    let mut res = 0_u64;
+    for j in 0..n {
+        for i in 0..n {
+            res += data[i * n + j] as u64;
+        }
+    }
+    res
+}
+
 fn main() {
     let a = 42;
     let b = &B;
@@ -94,4 +114,17 @@ fn main() {
 
     // mem_scan();
     print_addresses();
+
+    // virtual memory to physical memory
+    // CPU contain a memroy managment unit (MMU)
+    // memory lookup is cached in Translation lookaside buffer (TLB)
+    // Virtual addresse are grouped into blocks called pages (typically 4KB)
+
+    // ## tips for optimiaztion related to virtula memory
+    // - keep hot working portions of program with 4KB (faster lookup)
+    // - if 4KB is unreasonable, next target should be 4KB * 100
+    // - avoid deeply nested data structures with pointer spaghetti
+    // - test ordering of your nested loops, column wise or row-wise
+    // (col_wise_sum is far worse than row_wise_sum because 2D array in rust is row-major
+    // meaning arr[i][j] and arr[i][j+1] sit next to each other in memory)
 }
