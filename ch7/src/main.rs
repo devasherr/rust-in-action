@@ -1,3 +1,5 @@
+use std::env;
+use std::fs::File;
 use std::io::Read;
 
 use serde_cbor::to_vec as to_cbor;
@@ -28,15 +30,15 @@ fn serialize() {
 }
 
 fn hex_view() -> std::io::Result<()> {
-    let bytes_per_line: usize = 16;
-    let mut input: &'static [u8] = br#"
-    fn main() {
-        println!("Hello, World!");
-    }
-        "#;
+    let fname_arg = env::var("FILE_NAME");
+    let fname = fname_arg.expect("usage: fview FILENAME");
 
-    let mut buffer: Vec<u8> = vec![];
-    input.read_to_end(&mut buffer)?;
+    let mut f = File::open(fname).expect("unable to open file");
+
+    let bytes_per_line: usize = 16;
+
+    let mut buffer: Vec<u8> = Vec::new();
+    f.read_to_end(&mut buffer)?;
 
     let mut position_in_input = 0;
     for line in buffer.chunks(bytes_per_line) {
