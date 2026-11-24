@@ -16,7 +16,7 @@ type ByteStr = [u8];
 #[derive(Debug, Serialize, Deserialize)]
 pub struct KeyValuePair {
     pub key: ByteString,
-    pub value: ByteStr,
+    pub value: ByteString,
 }
 
 #[derive(Debug)]
@@ -123,5 +123,61 @@ impl ActionKv {
         let position = self.insert_but_ignore_index(key, value)?;
         self.index.insert(key.to_vec(), position);
         Ok(())
+    }
+
+    pub fn get_at(&mut self, position: u64) -> io::Result<KeyValuePair> {
+        let mut f = BufReader::new(&mut self.f);
+        f.seek(SeekFrom::Start(position))?;
+        let kv = ActionKv::process_record(&mut f)?;
+
+        Ok(kv)
+    }
+
+    pub fn get(&mut self, key: &ByteStr) -> io::Result<Option<ByteString>> {
+        let position = match self.index.get(key) {
+            None => return Ok(None),
+            Some(position) => *position,
+        };
+
+        let kv = self.get_at(position)?;
+        Ok(Some(kv.value))
+    }
+
+    pub fn find(&mut self, target: &ByteString) -> io::Result<Option<(u64, ByteString)>> {
+        let mut f = BufReader::new(&mut self.f);
+        let mut found: Option<(u64, ByteString)> = None;
+
+        loop {
+            let position = f.seek(SeekFrom::Current(0))?;
+
+            let maybe_kv = ActionKv::process_record(&mut f);
+            let kv = match maybe_kv {
+                Ok(kv) => kv,
+                Err(err) => match err.kind() {
+                    io::ErrorKind::UnexpectedEof => {
+                        break;
+                    }
+                    _ => return Err(err),
+                },
+            };
+
+            if kv.key == *target {
+                found = Some((position, kv.value));
+            }
+
+            // keep looping incase key if overwritten
+        }
+
+        Ok(found)
+    }
+
+    #[inline]
+    pub fn update(&mut self, key: &ByteStr, value: &ByteStr) -> io::Result<()> {
+        self.insert(key, value)
+    }
+
+    #[inline]
+    pub fn delete(&mut self, key: &ByteStr) -> io::Result<()> {
+        self.insert(key, b"")
     }
 }

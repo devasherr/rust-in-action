@@ -1,6 +1,4 @@
-use liactionakv::ActionKv;
-
-use std::path::Path;
+use libactionkv::ActionKv;
 
 const USAGE: &str = "
 Usage:
@@ -14,7 +12,7 @@ fn main() {
     let args: Vec<String> = std::env::args().collect();
     let fname = args.get(1).expect(&USAGE);
     let action = args.get(2).expect(&USAGE).as_ref();
-    let key = args.get(3).expect(&USAGE);
+    let key = args.get(3).expect(&USAGE).as_ref();
     let maybe_value = args.get(4);
 
     let path = std::path::Path::new(&fname);
@@ -24,7 +22,7 @@ fn main() {
     match action {
         "get" => match store.get(key).unwrap() {
             None => eprintln!("{:?} not found", key),
-            Some(value) => println!("{:?}", value),
+            Some(value) => println!("{:?}", String::from_utf8(value)),
         },
 
         "delete" => store.delete(key).unwrap(),
