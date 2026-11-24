@@ -54,7 +54,24 @@ fn hex_view() -> std::io::Result<()> {
     Ok(())
 }
 
+fn parity_bit(bytes: &[u8]) -> u8 {
+    let mut n_ones = 0;
+    for byte in bytes {
+        let ones = byte.count_ones();
+        n_ones += ones;
+    }
+
+    (n_ones % 2 == 0) as u8
+}
+
 fn main() {
     // serialize();
-    hex_view().unwrap();
+    // hex_view().unwrap();
+    let abc = b"abc";
+    println!("input: {:?}", abc);
+    println!("output: {:08x}\n", parity_bit(abc));
+
+    let abc = b"abcd";
+    println!("input: {:?}", abc);
+    println!("output: {:08x}", parity_bit(abc));
 }

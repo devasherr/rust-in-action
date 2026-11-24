@@ -55,7 +55,7 @@ impl ActionKv {
                 },
             };
 
-            self.index.insert(kv.key, kv.value);
+            self.index.insert(kv.key, position);
         }
 
         Ok(())
