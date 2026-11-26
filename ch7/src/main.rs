@@ -1,10 +1,12 @@
+use core::num;
+use std::collections::{BTreeMap, HashMap};
 use std::env;
 use std::fs::File;
 use std::io::Read;
 
 use serde_cbor::to_vec as to_cbor;
 use serde_derive::Serialize;
-use serde_json::to_string as to_json;
+use serde_json::{json, to_string as to_json};
 
 #[derive(Serialize)]
 struct City {
@@ -64,14 +66,55 @@ fn parity_bit(bytes: &[u8]) -> u8 {
     (n_ones % 2 == 0) as u8
 }
 
+fn hashmap_example() {
+    let mut capitals: HashMap<&str, &str> = HashMap::new();
+
+    capitals.insert("Cook Islands", "Avarua");
+    capitals.insert("Fiji", "Suva");
+    capitals.insert("Niue", "Alofi");
+
+    println!("{}", capitals["Niue"])
+}
+
+fn hashmap_from_json() {
+    let capitals = json!({
+        "Cook Islands": "Avarua",
+        "Fiji": "Suva",
+        "Kiribati": "South Tarawa",
+        "Niue": "Alofi",
+        "Tonga": "Nuku'alofa",
+        "Tuvalu": "Funafuti"
+    });
+
+    println!("{}", capitals["Niue"]);
+    println!()
+}
+
+fn btreemap_example() {
+    let mut voc = BTreeMap::new();
+
+    voc.insert(3_697_915, "Amsterdam");
+    voc.insert(1_300_405, "Middleburg");
+    voc.insert(540_000, "Enkhuizen");
+
+    for (guilder, kamer) in &voc {
+        println!("{} invested {}", kamer, guilder)
+    }
+}
+
 fn main() {
     // serialize();
     // hex_view().unwrap();
-    let abc = b"abc";
-    println!("input: {:?}", abc);
-    println!("output: {:08x}\n", parity_bit(abc));
 
-    let abc = b"abcd";
-    println!("input: {:?}", abc);
-    println!("output: {:08x}", parity_bit(abc));
+    // let abc = b"abc";
+    // println!("input: {:?}", abc);
+    // println!("output: {:08x}\n", parity_bit(abc));
+    //
+    // let abc = b"abcd";
+    // println!("input: {:?}", abc);
+    // println!("output: {:08x}", parity_bit(abc));
+
+    hashmap_example();
+    hashmap_from_json();
+    btreemap_example();
 }
